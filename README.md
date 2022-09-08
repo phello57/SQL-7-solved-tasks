@@ -42,11 +42,15 @@
 <br>	INNER JOIN records on records.acc_ref = accounts.id
 <br>	where to_days(now()) - to_days(oper_date) <= 30
 <br>	group by accounts.name, records.oper_date
-  <br>
-  <h2>Что отдает запрос</h2><br>
-<img width="650px" height="" src="https://user-images.githubusercontent.com/103268341/189204241-ef745d70-8c34-4642-9667-c141b719b639.png"></img>
 <br>
-Решение: сформировать 
+
+  <h2>Запрос без группировки и count(1)</h2><br>
+<img width="550px" height="" src="https://user-images.githubusercontent.com/103268341/189206720-f1e419c3-c3ed-4996-afd4-03361ddcff35.png"></img>
+
+  <h2>Что отдает запрос</h2><br>
+<img width="550px" height="" src="https://user-images.githubusercontent.com/103268341/189204241-ef745d70-8c34-4642-9667-c141b719b639.png"></img>
+<br>
+
 <br>
 <strong>4.</strong>	В результате сбоя в базе данных разъехалась информация между <br>остатками и операциями по счетам. Напишите нормализацию <br>(процедуру выравнивающую данные), которая найдет такие счета <br>и восстановит остатки по счету.
 <br>
@@ -77,7 +81,7 @@
 <br> В чем суть: в таблице records, в столбике dt указаны значения операций. 0 - на счет положили деньги. 1 - со счета сняли. <br>Я сгруппировал все пополнения и траты, а потом вычел второе из первого. У меня получились корректные данные на основе истории транзакций
 <br>
 <br>
-<strong>4.</strong>	Сформируйте выборку, который содержит информацию о клиентах, <br>которые полностью погасили кредит, но при этом<br> не закрыли продукт и пользуются им дальше <br>(по продукту есть операция новой выдачи кредита).
+<strong>5.</strong>	Сформируйте выборку, который содержит информацию о клиентах, <br>которые полностью погасили кредит, но при этом<br> не закрыли продукт и пользуются им дальше <br>(по продукту есть операция новой выдачи кредита).
 <br>
 <br>select *, count(1)
 <br>from (select * from (select client_ref, name  from products where product_type_id = 1 AND close_date is not null group by client_ref, name) as a1
@@ -93,8 +97,8 @@
 <img width="400px" height="" src="https://user-images.githubusercontent.com/103268341/188667495-ae99a504-6137-44db-b4d0-4c2b4879a4a8.png"></img>
 
 <br>Решение: сформировал две таблицы. Первая это те, кто погалиси кредит. Вторая - те кто выплачивает. Каждая сгруппирована в подзапросе. 
-<br> Связал их Union all , и у тех, у кого count(1) > 1 означает что они имеют и закрытый и открытый. 
-<img width="800px" height="" src="https://user-images.githubusercontent.com/103268341/189205460-35223d48-a24b-418f-b354-9a9566d1ebd5.png"></img>
+<br> Связал их Union all , и у тех, у кого count(1) > 1 означает что они имеют и закрытый и открытый. <br>
+<img width="400px" height="" src="https://user-images.githubusercontent.com/103268341/189205460-35223d48-a24b-418f-b354-9a9566d1ebd5.png"></img>
 
 
  
