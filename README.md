@@ -6,11 +6,13 @@
 <br>
 <strong>1.</strong> Сформируйте отчет, который содержит все счета,<br> относящиеся к продуктам типа ДЕПОЗИТ, принадлежащих клиентам, <br>у которых нет открытых продуктов типа КРЕДИТ.
 <br>
-<br>select *
-<br>	from accounts
-<br>	where (product_ref = 1 or product_ref = 2) AND close_date is null
-<br>	group by client_ref
-<br>	having product_ref != 1
+<br>select * from (
+<br>	select *
+<br>		from accounts
+<br>		where (product_ref = 1 or product_ref = 2) AND close_date is null
+<br>		Order by client_ref, product_ref) as acc
+<br>	group by acc.client_ref
+<br>	having acc.product_ref != 1
 <br>
 <h2>Таблица:</h2>
 <img width="900px" height="" src="https://user-images.githubusercontent.com/103268341/188656591-3fcfe498-508e-4493-958e-e85f56c070fe.png"></img>
@@ -20,10 +22,9 @@
 <br>
 <strong>2.</strong>	Сформируйте выборку, который содержит движения по счетам в рамках<br> одного произвольного дня, в разрезе типа продукта.
 <br>
-<br>select accounts.id, accounts.name, accounts.acc_num,records.dt, records.sum, records.acc_ref, records.oper_date
-<br>	from accounts
-<br>	INNER JOIN records on records.acc_ref = accounts.id
-<br>	where oper_date = '2015-10-01'
+<br>select accounts.id, accounts.name, accounts.acc_num,records.dt, records.sum, records.acc_ref, records.oper_date, accounts.product_ref
+<br>	from accounts INNER JOIN records on records.acc_ref = accounts.id
+<br>	where oper_date = '2015-10-01' and product_ref = 1;
 <h2>Таблицы:</h2>
 <div style="display: flex">
   <img width="350px" height="" src="https://user-images.githubusercontent.com/103268341/188658784-cff8d055-491d-4e7f-88ec-963fbd8c70c3.png"></img>
@@ -33,7 +34,21 @@
 <img width="800px" height="" src="https://user-images.githubusercontent.com/103268341/188659880-44023492-70e0-4569-ac1b-50f953b2bafe.png"></img>
 <br>
 <br>
-<strong>3.</strong>	В результате сбоя в базе данных разъехалась информация между <br>остатками и операциями по счетам. Напишите нормализацию <br>(процедуру выравнивающую данные), которая найдет такие счета <br>и восстановит остатки по счету.
+<strong>3.</strong>	Сформируйте выборку, в который попадут клиенты, у которых были операции по счетам 
+<br>за прошедший месяц от текущей даты. Выведите клиента и сумму операций за день в разрезе даты.
+<br>
+<br>select accounts.id, accounts.name, records.oper_date, count(1) as Операций_за_день
+<br>	from accounts
+<br>	INNER JOIN records on records.acc_ref = accounts.id
+<br>	where to_days(now()) - to_days(oper_date) <= 30
+<br>	group by accounts.name, records.oper_date
+  <br>
+  <h2>Что отдает запрос</h2><br>
+<img width="650px" height="" src="https://user-images.githubusercontent.com/103268341/189204241-ef745d70-8c34-4642-9667-c141b719b639.png"></img>
+<br>
+Решение: сформировать 
+<br>
+<strong>4.</strong>	В результате сбоя в базе данных разъехалась информация между <br>остатками и операциями по счетам. Напишите нормализацию <br>(процедуру выравнивающую данные), которая найдет такие счета <br>и восстановит остатки по счету.
 <br>
 <br>UPDATE accounts as a1, records as a2
 <br>SET a1.saldo = (select a3.sam 
@@ -77,13 +92,9 @@
 <h2>Что отдает запрос</h2>
 <img width="400px" height="" src="https://user-images.githubusercontent.com/103268341/188667495-ae99a504-6137-44db-b4d0-4c2b4879a4a8.png"></img>
 
-<br>Решение: я сформировал две выборки подзапросами.(Погашенных кредитов может быть много) Первая собирала всех клиентов, которые погасили кредит и группировала их в одну строку. <br> Вторая собирала всех клиентов с открытыми кредитами и делала тоже самое. <br>Далее я соединяю эти таблицы вместе и делаю группировку. <br>И если count(1) > 1, то это означает что клиент  имеет погашенный кредит и выплачивает новый. 
+<br>Решение: сформировал две таблицы. Первая это те, кто погалиси кредит. Вторая - те кто выплачивает. Каждая сгруппирована в подзапросе. 
+<br> Связал их Union all , и у тех, у кого count(1) > 1 означает что они имеют и закрытый и открытый. 
+<img width="800px" height="" src="https://user-images.githubusercontent.com/103268341/189205460-35223d48-a24b-418f-b354-9a9566d1ebd5.png"></img>
 
 
-
-
-
-
-
-
-// <img width="800px" height="" src=""></img>
+ 
