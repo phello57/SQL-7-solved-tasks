@@ -4,101 +4,94 @@
 <img width="500px" height="" src="https://user-images.githubusercontent.com/103268341/188669634-31d60599-4dc4-48e4-b314-cac6f77304c0.png"></img>
 <br>
 <br>
-<strong>1.</strong> Сформируйте отчет, который содержит все счета,<br> относящиеся к продуктам типа ДЕПОЗИТ, принадлежащих клиентам, <br>у которых нет открытых продуктов типа КРЕДИТ.
-<br>
+## 1.
+Сформируйте отчет, который содержит все счета, относящиеся к продуктам <br>типа ДЕПОЗИТ, принадлежащих клиентам, у которых нет открытых продуктов типа КРЕДИТ.<br>
+  
 <br>select * from (
-<br>	select *
-<br>		from accounts
-<br>		where (product_ref = 1 or product_ref = 2) AND close_date is null
-<br>		Order by client_ref, product_ref) as acc
-<br>	group by acc.client_ref
-<br>	having acc.product_ref != 1
-<br>
-<h2>Таблица:</h2>
-<img width="900px" height="" src="https://user-images.githubusercontent.com/103268341/188656591-3fcfe498-508e-4493-958e-e85f56c070fe.png"></img>
-<h2>Что отдает запрос</h2>
-<img width="900px" height="" src="https://user-images.githubusercontent.com/103268341/188656842-8dd6607e-ac47-47b7-87a7-609c2cf65448.png"></img>
-<br>
-<br>
-<strong>2.</strong>	Сформируйте выборку, который содержит движения по счетам в рамках<br> одного произвольного дня, в разрезе типа продукта.
-<br>
-<br>select accounts.id, accounts.name, accounts.acc_num,records.dt, records.sum, records.acc_ref, records.oper_date, accounts.product_ref
-<br>	from accounts INNER JOIN records on records.acc_ref = accounts.id
-<br>	where oper_date = '2015-10-01' and product_ref = 1;
-<h2>Таблицы:</h2>
-<div style="display: flex">
-  <img width="350px" height="" src="https://user-images.githubusercontent.com/103268341/188658784-cff8d055-491d-4e7f-88ec-963fbd8c70c3.png"></img>
-  <img width="600px" height="" src="https://user-images.githubusercontent.com/103268341/188656591-3fcfe498-508e-4493-958e-e85f56c070fe.png"></img>
-</div>
-<h2>Что отдает запрос</h2>
-<img width="800px" height="" src="https://user-images.githubusercontent.com/103268341/188659880-44023492-70e0-4569-ac1b-50f953b2bafe.png"></img>
-<br>
-<br>
-<strong>3.</strong>	Сформируйте выборку, в который попадут клиенты, у которых были операции по счетам 
-<br>за прошедший месяц от текущей даты. Выведите клиента и сумму операций за день в разрезе даты.
-<br>
-<br>select accounts.id, accounts.name, records.oper_date, count(1) as Операций_за_день
-<br>	from accounts
-<br>	INNER JOIN records on records.acc_ref = accounts.id
-<br>	where to_days(now()) - to_days(oper_date) <= 30
-<br>	group by accounts.name, records.oper_date
-<br>
+<br>&nbsp;	***select * from accounts
+<br>&nbsp;&nbsp;&nbsp;		where (product_ref = 1 or product_ref = 2) AND close_date is null
+<br>&nbsp;&nbsp;&nbsp;		Order by client_ref, product_ref***) as acc
+<br>&nbsp;	group by acc.client_ref
+<br>&nbsp;	having acc.product_ref != 1;
+##### Решение: <br> Подзапросом я получаю всех клиентов, у кого есть открытые депозиты и открытые кредиты.<br> Группирую. Группировка оставляет у клиента одну запись<br> Если у клиента не было кредитов, у него останется 2(Депозит) в product_ref.
+<br>Что отдает подзапрос
+![Screenshot_5](https://user-images.githubusercontent.com/113181404/189364761-6b48e952-d97b-4451-b52c-e60d96eb0040.png)
+<br>Результат
+![Screenshot_3](https://user-images.githubusercontent.com/113181404/189364460-59fa03ff-6f25-4603-9769-b2d39191686d.png)
 
-  <h2>Запрос без группировки и count(1)</h2><br>
-<img width="550px" height="" src="https://user-images.githubusercontent.com/103268341/189206720-f1e419c3-c3ed-4996-afd4-03361ddcff35.png"></img>
+## 2.
+Сформируйте выборку, которая содержит средние движения по счетам в рамках одного произвольного дня, в разрезе типа продукта.
+<br>
+<br>select accounts.id, accounts.name, accounts.acc_num, records.acc_ref, records.oper_date, accounts.product_ref
+<br>&nbsp;&nbsp;&nbsp;		from accounts INNER JOIN records on records.acc_ref = accounts.id
+<br>&nbsp;&nbsp;&nbsp;	where oper_date = '2015-10-01' and product_ref = 1;
+<br>
+##### Решение: <br> Cклеил две таблицы inner join и отсортировал их по дате и типу продукта.
+Результат<br>
+![Screenshot_3](https://user-images.githubusercontent.com/113181404/189371394-755477d7-864a-44fd-b16a-4769f5f63fb5.png)
 
-  <h2>Что отдает запрос</h2><br>
-<img width="550px" height="" src="https://user-images.githubusercontent.com/103268341/189204241-ef745d70-8c34-4642-9667-c141b719b639.png"></img>
+## 3.
+Сформируйте выборку, в который попадут клиенты, у которых были операции по счетам <br>за прошедший месяц от текущей даты. Выведите клиента и сумму операций за день в разрезе даты.
 <br>
-
+<br>select accounts.id, accounts.name, records.oper_date, count(1) as Количество операций
+<br>&nbsp;&nbsp;	from accounts
+<br>&nbsp;&nbsp;	INNER JOIN records on records.acc_ref = accounts.id
+<br>&nbsp;&nbsp;	where to_days(now()) - to_days(oper_date) <= 30
+<br>&nbsp;&nbsp;	group by accounts.name, records.oper_date
+##### Решение: соединяю две таблицы. Каждую дату вычитаю из сегодняшней, получаю число. Добавляю count(1) и группирую
+<br>Результат<br>
+![Screenshot_3](https://user-images.githubusercontent.com/113181404/189374042-777379f0-3782-4841-bd9f-09461f573cb3.png)
+## 4.
+В результате сбоя в базе данных разъехалась информация между остатками и операциями <br>по счетам. Напишите нормализацию (процедуру выравнивающую данные), которая найдет такие <br>счета и восстановит остатки по счету.
 <br>
-<strong>4.</strong>	В результате сбоя в базе данных разъехалась информация между <br>остатками и операциями по счетам. Напишите нормализацию <br>(процедуру выравнивающую данные), которая найдет такие счета <br>и восстановит остатки по счету.
-<br>
+<br>select * from accounts;
 <br>UPDATE accounts as a1, records as a2
 <br>SET a1.saldo = (select a3.sam 
-<br>&nbsp;                        from (select sum(sum) as sam, dt, acc_ref 
-<br>&nbsp;                              from records 
-<br>    &nbsp;                          group by acc_ref, dt) as a3
-<br>  &nbsp;                      where a3.dt = 0 AND a1.id = a3.acc_ref) 
-<br>  &nbsp;                      - 
- <br>  &nbsp;                     (select a4.sumi 
-<br>  &nbsp;                       from (select sum(sum) as sumi, dt, acc_ref 
-<br>  &nbsp;                             from records 
-<br> &nbsp;                              group by acc_ref, dt) as a4
-<br>  &nbsp;                       where a4.dt = 1 AND a1.id = a4.acc_ref)
-<br>where a1.id = a2.acc_ref;
+<br>&nbsp;&nbsp;                        from (select sum(sum) as sam, dt, acc_ref 
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                              from records 
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                             group by acc_ref, dt) as a3
+<br>&nbsp;&nbsp;                       where a3.dt = 0 AND a1.id = a3.acc_ref) 
+<br>&nbsp;&nbsp;                        - 
+<br>&nbsp;&nbsp;                        (select a4.sumi 
+<br>&nbsp;&nbsp;                         from (select sum(sum) as sumi, dt, acc_ref 
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                               from records 
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                               group by acc_ref, dt) as a4
+<br>&nbsp;&nbsp;                         where a4.dt = 1 AND a1.id = a4.acc_ref)
+<br>where a1.id = a2.acc_ref; <br><br>
+***Решение: в таблице records, в столбике dt указаны значения операций. 0 - пополнение. 1 - снятие. Я сгруппировал все пополнения и снятия, а потом вычел второе из первого. У меня получились корректные данные на основе истории транзакций***<br>
+<br>Добавил всем по 10000 
+![Screenshot_2](https://user-images.githubusercontent.com/113181404/189375913-8b80df72-2ca5-4e5d-84a5-9938f0d7676b.png)
+<br>Результат
+![Screenshot_5](https://user-images.githubusercontent.com/113181404/189376034-22b9ac7a-9755-4b44-872a-6c98ec0ecbcb.png)
+## 5.
+Сформируйте выборку, который содержит информацию о клиентах, которые полностью погасили кредит, но при этом не закрыли продукт и пользуются им дальше (по продукту есть операция новой выдачи кредита).
 <br>
-
-<div style="display: flex">
-  <img width="350px" height="" src="https://user-images.githubusercontent.com/103268341/188658784-cff8d055-491d-4e7f-88ec-963fbd8c70c3.png"></img>
-  <br>Например я добавил каждому счету по 10 000:
-  <img width="800px" height="" src="https://user-images.githubusercontent.com/103268341/188663676-afada670-0c5d-4678-b586-e3ea4e8e52df.png"></img>
-</div>
-
-<h2>Что отдает запрос</h2>
-<img width="800px" height="" src="https://user-images.githubusercontent.com/103268341/188664286-6d7b02ab-4b2f-4022-b1a8-399f8cef2053.png"></img>
-<br>
-<br> Решение: в таблице records, в столбике dt указаны значения операций. 0 - на счет положили деньги. 1 - со счета сняли. <br>Я сгруппировал все пополнения и траты, а потом вычел второе из первого. У меня получились корректные данные на основе истории транзакций
-<br>
-<br>
-<strong>5.</strong>	Сформируйте выборку, который содержит информацию о клиентах, <br>которые полностью погасили кредит, но при этом<br> не закрыли продукт и пользуются им дальше <br>(по продукту есть операция новой выдачи кредита).
-<br>
-<br>select *, count(1)
-<br>from (select * from (select client_ref, name  from products where product_type_id = 1 AND close_date is not null group by client_ref, name) as a1
-<br>        union all
-<br>        select * from (select client_ref, name  from products where product_type_id = 1 AND close_date is null group by client_ref, name) as a2) as a3
+<br>select *
+<br>&nbsp;&nbsp;from (select * from (select client_ref, name  from products where product_type_id = 1 AND close_date is not null group by client_ref, <br>&nbsp;&nbsp;name) as a1
+<br>&nbsp;&nbsp;&nbsp;&nbsp;        union all
+<br>&nbsp;&nbsp;        select * from (select client_ref, name  from products where product_type_id = 1 AND close_date is null group by client_ref, name) <br>&nbsp;&nbsp;as a2) as a3
 <br>group by a3.client_ref, a3.name
 <br>having count(1) > 1
+##### Решение:<br> В первом подзапросе клиенты с закрытым кредитом. Во втором - с открытым кредитом. Кто попадает в обе группы - результат
+<br>Объединенная таблица union all<br>
+![Screenshot_2](https://user-images.githubusercontent.com/113181404/189382534-8f98e997-4f70-4629-ab9e-66685f39bd81.png)
+<br>Результат<br>
+![Screenshot_3](https://user-images.githubusercontent.com/113181404/189382540-13adfaeb-ee0e-4cf6-9c72-6b069e3557a0.png)
+
+## 6.
+Закройте возможность открытия (установите дату окончания действия) для типов продуктов, по счетам продуктов которых, не было движений более одного месяца.<br>
+<br>update accounts as a1
+<br>set a1.close_date = CURRENT_DATE(); 
+<br>where to_days(NOW()) - TO_DAYS(
+<br>&nbsp;&nbsp;&nbsp;&nbsp;            (select a2.oper
+<br>&nbsp;&nbsp;&nbsp;&nbsp;            from (select max(oper_date) as oper,acc_ref from records group by acc_ref) as a2
+<br>&nbsp;&nbsp;&nbsp;&nbsp;            where  a1.id = a2.acc_ref)) >= 30;
 <br>
-<h2>Таблица:</h2>
-<img width="800px" height="" src="https://user-images.githubusercontent.com/103268341/188667229-e385ec96-6db6-4315-8d95-e4575caffe10.png"></img>
-
-<h2>Что отдает запрос</h2>
-<img width="400px" height="" src="https://user-images.githubusercontent.com/103268341/188667495-ae99a504-6137-44db-b4d0-4c2b4879a4a8.png"></img>
-
-<br>Решение: сформировал две таблицы. Первая это те, кто погалиси кредит. Вторая - те кто выплачивает. Каждая сгруппирована в подзапросе. 
-<br> Связал их Union all , и у тех, у кого count(1) > 1 означает что они имеют и закрытый и открытый. <br>
-<img width="400px" height="" src="https://user-images.githubusercontent.com/103268341/189205460-35223d48-a24b-418f-b354-9a9566d1ebd5.png"></img>
-
+##### Решение:<br> Из таблицы с последней датой достаем дату по каждому счету. Вычитаем её из сегодняшней даты. Если получ. число больше 30 - закрываем счет.
+<br>Таблица с последней датой по каждому счету<br>
+![Screenshot_8](https://user-images.githubusercontent.com/113181404/189384110-7914ef70-fa01-4f49-9d1f-b64fdfd66ccc.png)
+<br>Результат<br>
+![Screenshot_6](https://user-images.githubusercontent.com/113181404/189383839-2485f5c2-4f57-4876-b816-73b0401c5e46.png)
+ 
 
  
