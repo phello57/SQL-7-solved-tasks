@@ -92,6 +92,22 @@
 ![Screenshot_8](https://user-images.githubusercontent.com/113181404/189384110-7914ef70-fa01-4f49-9d1f-b64fdfd66ccc.png)
 <br>Результат<br>
 ![Screenshot_6](https://user-images.githubusercontent.com/113181404/189383839-2485f5c2-4f57-4876-b816-73b0401c5e46.png)
- 
+ ## 7.
+Закройте продукты (установите дату закрытия равную текущей) типа КРЕДИТ, у которых произошло полное погашение, но при этом не было повторной выдачи.<br>
+<br>
+<br>update accounts as a1
+<br>set a1.close_date = CURRENT_DATE()
+<br>where id in (select * from (select a2.id from (select * from accounts where saldo = 0 and close_date is null) as a2
+<br>where not exists (select * from accounts as a3 where saldo < 0 and a2.client_ref = a3.client_ref AND a3.close_date is null))as a4)
+<br>
+
+##### Решение:<br> Нужно найти всех тех, у кого saldo = 0 и close_date = null это первая таблица в подзапросе.Во второй таблице все клиенты с непогашенными кредитами. Мы ищем во второй таблице сходства с первой по каждому клиенту. Если клиента нет во второй таблице(но есть в первой) - меняем у него дату на сегодняшнюю.<br>
+<br>Что отдает подзапрос<br>
+![Screenshot_2](https://user-images.githubusercontent.com/113181404/189486930-d845dd92-cde4-4132-8513-2efebbdcaff0.png)
+<br>Начальная таблица<br>
+![Screenshot_5](https://user-images.githubusercontent.com/113181404/189486955-6271ec7b-ec96-4770-a10b-3deb46436b8a.png)
+<br>Результат<br>
+![Screenshot_6](https://user-images.githubusercontent.com/113181404/189487094-293181be-84f9-45b3-a316-7bcf601b5d90.png)
+<br>
 
  
