@@ -1,7 +1,7 @@
 ## MySQL
-<br>
+
 Данные задачи это тестовое задание на поступление на курс по "ЦФТ разработке" от ШИФТ
-<br>
+<br><br>
 Модель
 <br>
 <img width="500px" height="" src="https://user-images.githubusercontent.com/103268341/188669634-31d60599-4dc4-48e4-b314-cac6f77304c0.png"></img>
